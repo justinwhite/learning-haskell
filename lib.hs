@@ -1,3 +1,6 @@
+import Data.List
+import Data.Char
+
 -- ***************************************************************
 -- starting out
 -- ***************************************************************
@@ -152,9 +155,9 @@ length'' :: [a] -> Int
 length'' [] = 0
 length'' (_:x) = 1 + length'' x 
 
-sum' :: (Num a) => [a] -> a
-sum' [] = 0
-sum' (x:xs) = x + sum' xs
+--sum' :: (Num a) => [a] -> a
+--sum' [] = 0
+--sum' (x:xs) = x + sum' xs
 
 -- `@` allows us to keep the entire input list handy
 firstLetter :: String -> String
@@ -333,6 +336,10 @@ sum'' xs = foldl (+) 0 xs
 -- ($) :: (a -> b) -> a -> b  
 -- lower precendence method to apply functions
 -- i.e. `sum ( map sqrt [1..100] )` is equivalent to `sum $ map sqrt [1.100]`
+-- `$` is right associative 
+-- function application with a space is left associative
+-- i.e. `f a b c` = `((f a) b) c` 
+-- and `f $ a $ b c` = `f (a (b c))`
 
 -- function composition with `.`
 -- (.) :: (b -> c) -> (a -> b) -> a -> c  
@@ -343,3 +350,56 @@ sum'' xs = foldl (+) 0 xs
 
 -- point free style
 -- relying on the currying of functions to reduce explicit variables
+-- in this case, the sum'' function simply produces a function that takes a list
+-- which is the same behavior as above, given that the sum'' function really only 
+-- takes one parameter, curries it and recevies the list in the second application
+-- of the function
+sum''' :: (Num a) => [a] -> a
+sum''' = foldl (+) 0
+
+-- ***************************************************************************
+-- Modules
+-- ***************************************************************************
+
+-- Prelude is the default module
+-- import must be done before any function declarations
+-- add modules to ghci with `:m <name.of.module> ..`
+
+-- import qualified Data.Map as M
+-- forces all calls to Data.Map functions to use the full qualifier
+-- which has been aliased to `M`
+-- i.e. `M.filter`
+
+-- vectorwise sum of 3 vectors
+vsum :: (Num a) => [a]
+vsum = map sum $ transpose [[0,3,5,9],[10,0,0,9],[8,5,1,-1]]
+
+-- `fold'` and `foldll'` actually compute accumulation each application
+-- the normal version (minus the `'`) simply adds the operation to the stack 
+-- which can cause stack overflow issues on really long lists
+
+search :: (Eq a) => [a] -> [a] -> Bool
+search needle haystack = 
+	let nlen = length needle
+	in  foldl (\acc x -> if take nlen x == needle then True else acc) False (tails haystack)
+
+-- generalCategory to roughly identify all types of chars
+
+encode :: Int -> String -> String
+encode shift msg = 
+	let ords = map ord msg
+	    shifted = map (+ shift) ords
+	in  map chr shifted
+
+encode' :: Int -> String -> String
+encode' shift msg = map (chr . (+ shift) . ord) msg
+
+decode :: Int -> String -> String
+decode shift msg = encode (negate shift) msg
+
+-- insertWith
+volume :: Float -> Float -> Float -> Float
+volume a b c = rectangleArea a b * c
+
+rectangleArea :: Float -> Float -> Float
+rectangleArea a b = a / b
