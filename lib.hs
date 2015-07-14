@@ -1,5 +1,8 @@
 import Data.List
 import Data.Char
+import Shapes
+import Lockers
+import Tree
 
 -- ***************************************************************
 -- starting out
@@ -403,3 +406,66 @@ volume a b c = rectangleArea a b * c
 
 rectangleArea :: Float -> Float -> Float
 rectangleArea a b = a / b
+
+-- ***************************************************************
+-- type classes
+-- ***************************************************************
+
+-- export all value constructors for a given type using `(..)`
+
+-- record syntax to declare data types
+data Person = Person { firstName :: String
+                     , lastName :: String
+					 , age :: Int
+					 } deriving (Show)
+
+data Maybe a = Nothing | Just a
+
+-- very strong convention in Haskell to never add typeclass constraints in data declarations
+-- end up writing more class constraints for little or no benefit
+
+data Vector a = Vector { x :: a
+                       , y :: a
+					   , z :: a
+					   } deriving (Show)
+
+vplus :: (Num t) => Vector t -> Vector t -> Vector t
+(Vector i j k) `vplus` (Vector l m n) = Vector (i + l) (j + m) (k + n)
+
+vmult :: (Num t) => Vector t -> Vector t -> Vector t
+(Vector i j k) `vmult` (Vector l m n) = Vector (i * l) (j * m) (k * n)
+
+-- Bounded typeclass for things that have a lowest possible value and highest possible value
+data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday   
+           deriving (Eq, Ord, Show, Read, Bounded, Enum)  
+
+-- use type synonyms to convey more information in type signatures
+-- simply an alias
+type PhoneNumber = String
+
+-- note that type constructors are not value constructors
+-- Cons = constructor `:`
+
+-- fixity can be defined:
+-- `infixr` or `infixl` with a order of operations precedence (fixity)
+-- ex. `*` is `infixl 7` while `+` is `infixl 6`
+
+-- given the standard definition of `Eq`
+-- class Eq a where  
+--		(==) :: a -> a -> Bool  
+--		(/=) :: a -> a -> Bool  
+-- 		x == y = not (x /= y)  
+-- 		x /= y = not (x == y)  
+
+-- and a data type
+data TrafficLight = Red | Yellow | Green
+-- we can manually extend `Eq` as
+instance Eq TrafficLight where
+	Red == Red = True
+	Green == Green = True
+	Yellow == Yellow = True
+	_ == _ = False
+-- as well as override the Show for each element
+instance Show TrafficLight where 
+	show Red = "Red light"
+	show x = show x 
