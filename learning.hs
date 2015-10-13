@@ -104,3 +104,57 @@ instance Show Currency where
 --  misc
 -- ******************************************************************
 Int is 64 bit
+
+
+
+
+
+-- 24 august 
+--
+-- ******************************************************************
+--  lambdas
+-- ******************************************************************
+
+runtime error occurs if pattern matching fails
+i.e. 
+map (\(a,b) -> a + b) [(1,2,3),(4,5,6)]
+
+example of using lambda instead of explicit recursion? 
+
+-- ******************************************************************
+--  functors
+-- ******************************************************************
+
+typeclass for things that can be mapped over
+mapping from set A to set B
+<$> synonymous with `fmap`, `lift`
+"lifting" from A to B
+
+instance Functor Tree where  
+    fmap f EmptyTree = EmptyTree  
+    fmap f (Node x leftsub rightsub) = Node (f x) (fmap f leftsub) (fmap f rightsub) 
+
+-- ******************************************************************
+--  applicatives
+-- ******************************************************************
+<*> is an applicative
+<*> :: f (a -> b) -> f a -> f b
+
+(*) <$> Just 5 <*> Just 7
+lift `*` into Just 5
+which produces (Just 5*)
+and then is applied to Just 7
+resulting in `Just 35`
+
+`>>=` is a bind
+>>= :: m a -> (a -> m b) -> m b
+anther way to `fmap` into a monad
+
+`return` is equivalent of apply
+
+try using a bind if the `do` notation doesn't work
+
+-- ******************************************************************
+--  monads
+-- ******************************************************************
+
