@@ -1,5 +1,3 @@
--- to run
-
 module CountEntriesT (listDirectory, countEntries) where
 
 import CountEntries (listDirectory)
