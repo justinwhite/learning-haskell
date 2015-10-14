@@ -1,15 +1,16 @@
-module MaybeT
-( MaybeT(..)
+module EitherT
+( EitherT(..)
 ) where
 
 import Control.Monad
 import Control.Monad.Trans
 
-newtype MaybeT m a = MaybeT {
-      runMaybeT :: m (Maybe a)
+newtype EitherT m a b = EitherT {
+      runEitherT :: m (Either a b)
     }
 
 bindMT :: (Monad m) => MaybeT m a -> (a -> MaybeT m b) -> MaybeT m b
+bindMT :: (Monad
 bindMT x f = MaybeT $ do
                  unwrapped <- runMaybeT x
                  case unwrapped of
