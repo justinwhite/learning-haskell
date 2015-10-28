@@ -2,8 +2,8 @@
 
 import Data.Aeson
 import Control.Applicative
-import Data.Vector (toList)
 import Data.Scientific
+import Data.ByteString.Lazy.Char8 (pack)
 
 data Exp
     = Add Exp Exp
@@ -76,10 +76,13 @@ instance ToJSON Exp where
 
 instance FromJSON Exp where
     parseJSON (Number n) = return $ Val $ toRealFloat n
-    parseJSON (Object v) = case tag of
-        "Val" -> (parseJSON payload)
-        where tag = v .: "tag"
-              payload = v .: "payload"
+    parseJSON (Object v) = case V.toList v of
+        [(key, val)]
+            | key == "Val" -> Val $ toRealFloat val
+    --parseJSON (Array a) = Add <$> mapM parseJSON (toList a)
+    parseJSON _ = empty
+    --parseJSON (Number n) = return $ toRealFloat n
+    --parseJSON (Object v) = return $ case (v .: "tag") of
         
 ex1 :: Exp
 ex1 = Div (Add (Val 1.0) (Val 2.0)) (Val 3.0)
