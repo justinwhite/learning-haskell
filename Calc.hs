@@ -1,9 +1,12 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ViewPatterns #-}
 
 import Data.Aeson
 import Control.Applicative
 import Data.Scientific
 import Data.ByteString.Lazy.Char8 (pack)
+import qualified Data.HashMap.Lazy as HM
+import qualified Data.Vector as V
 
 data Exp
     = Add Exp Exp
@@ -11,6 +14,7 @@ data Exp
     | Mul Exp Exp
     | Div Exp Exp
     | Val Double
+    | Empty
     deriving (Eq, Show)
 
 eval :: Exp -> Maybe Exp
@@ -76,25 +80,30 @@ instance ToJSON Exp where
 
 instance FromJSON Exp where
     parseJSON (Number n) = return $ Val $ toRealFloat n
-    parseJSON (Object v) = case V.toList v of
-        [(key, val)]
-            | key == "Val" -> Val $ toRealFloat val
-    --parseJSON (Array a) = Add <$> mapM parseJSON (toList a)
-    parseJSON _ = empty
-    --parseJSON (Number n) = return $ toRealFloat n
-    --parseJSON (Object v) = return $ case (v .: "tag") of
-        
+    parseJSON (Object o)
+        | tag == "Val" = parseJSON payload
+        | HM.lookup "tag" o == Just "Val" = 
+            (\(Just p) -> parseJSON p) $ HM.lookup "payload" o
+        where tag = case HM.lookup "tag" o of
+                Just t -> t
+              payload = case HM.lookup "payload" o of
+                Just p -> p
+
+create "Add" payload = parseJSON payload
+
 ex1 :: Exp
 ex1 = Div (Add (Val 1.0) (Val 2.0)) (Val 3.0)
 
 ex2 :: Exp
 ex2 = Div (Add (Val 1.0) (Val 2.0)) (Sub (Val 2.0) (Val 2.0))
 
-ex3 :: String
-ex3 = "{\"tag\": \"Add\", \"payload\": [{\"tag\": \"Val\", \"payload\": 1}, {\"tag\": \"Val\", \"payload\": 2}]}"
+--ex3 = "{\"tag\": \"Add\", \"payload\": [{\"tag\": \"Val\", \"payload\": 1}, {\"tag\": \"Val\", \"payload\": 2}]}"
+ex3 = "{\"tag\": \"Val\", \"payload\": 2}"
 
 main :: IO()
 main = do
     print $ eval ex1
     print $ eval ex2
     print $ encode ex2
+    case decode ex3 :: Maybe Exp of
+        Just e -> print e
